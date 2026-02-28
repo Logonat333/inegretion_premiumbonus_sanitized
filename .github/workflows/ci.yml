@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run lint
+      - run: npm run test
+
+  sast:
+    needs: build-test
+    permissions:
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v3
+
+  dast:
+    needs: build-test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run build
+      - name: Start API
+        run: |
+          node dist/apps/middleware/src/main.js &
+          echo $! > app.pid
+        env:
+          PORT: 3000
+          NODE_ENV: test
+          APP_ENV: dev
+          YCLIENTS_API_BASE_URL: http://localhost:3999
+          YCLIENTS_USER_TOKEN: test-token
+          PREMIUMBONUS_API_BASE_URL: http://localhost:4999
+          PREMIUMBONUS_TOKEN: test-token
+          POSTGRES_CONNECTION_STRING: postgresql://postgres:postgres@localhost:5432/app
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          REDIS_KEY_PREFIX: ci:
+          REDIS_TLS: "false"
+          RATE_LIMIT_MAX: 100
+          QUEUE_ATTEMPTS: 1
+          QUEUE_BACKOFF_DELAY_MS: 1000
+      - name: Wait for health endpoint
+        run: |
+          for i in {1..10}; do
+            if curl --fail http://localhost:3000/health/live; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Server did not become healthy" >&2
+          exit 1
+      - uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:3000'
+          cmd_options: '-m 1'
+      - name: Stop API
+        if: always()
+        run: |
+          if [ -f app.pid ]; then
+            kill $(cat app.pid) || true
+          fi
+
+  sbom:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run sbom
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: .sbom/bom.xml

@@ -1,0 +1,68 @@
+{
+  "name": "yclients-premiumbonus",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only --project tsconfig.json -r tsconfig-paths/register apps/middleware/src/main.ts",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "start": "node -r tsconfig-paths/register dist/apps/middleware/src/main.js",
+    "lint": "eslint \"apps/**/*.ts\"",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "sbom": "mkdir -p .sbom && npx @cyclonedx/cyclonedx-npm --output .sbom/bom.xml --mc-type application",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "bullmq": "^5.5.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "opossum": "^6.2.4",
+    "pg": "^8.11.3",
+    "pino": "^8.19.0",
+    "pino-http": "^8.5.1",
+    "swagger-ui-express": "^5.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "uuid": "^9.0.1",
+    "vite": "^6.3.6",
+    "yaml": "^2.4.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^4.0.3",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "@types/opossum": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^7.4.1",
+    "@typescript-eslint/parser": "^7.4.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.8",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "apps/**/*.{ts,tsx}": [
+      "eslint --max-warnings=0",
+      "prettier --write"
+    ],
+    "{*.json,*.cjs,tsconfig*.json,vitest*.config.ts}": [
+      "prettier --write"
+    ]
+  }
+}

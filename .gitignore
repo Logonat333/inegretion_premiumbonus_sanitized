@@ -1,0 +1,56 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.nyc_output/
+.DS_Store
+.tmp/
+.sbom/
+*.log
+*.pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local envs and tooling caches
+.venv/
+venv/
+site-packages/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Build and runtime artifacts
+build/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Local data, dumps, and reports
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.sql
+*.csv
+*.tsv
+exports/
+reports/
+feedback/
+
+# Credentials and keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_dsa

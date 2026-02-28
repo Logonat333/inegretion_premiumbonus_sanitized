@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: YClients Premium Bonus Middleware API
+  version: 0.1.0
+  description: Middleware between YClients and PremiumBonus loyalty platform.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/v1/purchases:
+    post:
+      summary: Queue purchase for PremiumBonus processing
+      tags:
+        - Purchases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePurchaseRequest'
+      responses:
+        '202':
+          description: Purchase accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePurchaseResponse'
+        '400':
+          description: Validation error
+        '409':
+          description: Duplicate purchase detected
+        '500':
+          description: Internal server error
+  /health/live:
+    get:
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Indicates application is running
+  /health/ready:
+    get:
+      summary: Readiness probe
+      responses:
+        '200':
+          description: Indicates application is ready to accept traffic
+components:
+  schemas:
+    PurchaseItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          minimum: 0
+      required:
+        - id
+        - name
+        - quantity
+        - price
+    CreatePurchaseRequest:
+      type: object
+      properties:
+        externalPurchaseId:
+          type: string
+        buyerId:
+          type: string
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseItem'
+        purchasedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - externalPurchaseId
+        - buyerId
+        - amount
+        - currency
+        - items
+        - purchasedAt
+    CreatePurchaseResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - queued
+        traceId:
+          type: string
+        requestId:
+          type: string
+      required:
+        - status
+        - traceId
+        - requestId
