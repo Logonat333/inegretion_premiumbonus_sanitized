@@ -1,6 +1,5 @@
 import type { Purchase } from "@domain/entities/purchase";
 import type { PremiumBonusAdapter } from "@infrastructure/adapters/premiumbonus/premiumbonus-adapter";
-import type { YClientsAdapter } from "@infrastructure/adapters/yclients/yclients-adapter";
 import type { PurchaseQueue } from "@infrastructure/persistence/redis/purchase-queue";
 import type { AuditLogRepository } from "@infrastructure/persistence/postgres/audit-log-repository";
 import { AppError } from "@shared/errors/app-error";
@@ -21,13 +20,11 @@ export interface ProcessPurchaseInput {
   metadata?: Record<string, unknown>;
 }
 
-export type YClientsGateway = Pick<YClientsAdapter, "getPurchase">;
 export type PremiumBonusGateway = Pick<PremiumBonusAdapter, "createPurchase">;
 export type AuditLogGateway = Pick<AuditLogRepository, "append">;
 export type PurchaseQueueGateway = Pick<PurchaseQueue, "enqueue">;
 
 export interface ProcessPurchaseDependencies {
-  yclientsAdapter: YClientsGateway;
   premiumBonusAdapter: PremiumBonusGateway;
   auditLogRepository: AuditLogGateway;
   purchaseQueue: PurchaseQueueGateway;
@@ -40,11 +37,11 @@ export class ProcessPurchaseUseCase {
     input: ProcessPurchaseInput,
   ): Promise<Result<{ status: "queued" }, AppError>> {
     try {
-      const purchase = await this.resolvePurchase(input);
+      const purchase = this.resolvePurchase(input);
 
       await this.dependencies.auditLogRepository.append({
         purchase,
-        source: "yclients",
+        source: "premiumbonus",
       });
 
       await this.dependencies.premiumBonusAdapter.createPurchase(purchase);
@@ -66,9 +63,7 @@ export class ProcessPurchaseUseCase {
     }
   }
 
-  private async resolvePurchase(
-    input: ProcessPurchaseInput,
-  ): Promise<Purchase> {
+  private resolvePurchase(input: ProcessPurchaseInput): Purchase {
     if (input.items.length === 0) {
       throw new AppError({
         message: "Purchase items required",
@@ -77,21 +72,17 @@ export class ProcessPurchaseUseCase {
       });
     }
 
-    const external = await this.dependencies.yclientsAdapter.getPurchase(
-      input.externalPurchaseId,
-    );
-
     return {
-      ...external,
+      id: input.externalPurchaseId,
+      externalId: input.externalPurchaseId,
+      items: input.items,
+      purchasedAt: input.purchasedAt,
       amount: input.amount,
       currency: input.currency,
       buyer: {
         id: input.buyerId,
       },
-      metadata: {
-        ...external.metadata,
-        ...input.metadata,
-      },
+      metadata: input.metadata,
     };
   }
 }

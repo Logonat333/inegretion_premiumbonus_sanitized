@@ -51,8 +51,6 @@ const configSchema = z.object({
   ALLOWED_ORIGINS: z.string().optional(),
   LOG_LEVEL: z.string().default("info"),
   TRACING_ENABLED: z.string().optional(),
-  YCLIENTS_API_BASE_URL: z.string().url(),
-  YCLIENTS_USER_TOKEN: z.string().min(1),
   PREMIUMBONUS_API_BASE_URL: z.string().url(),
   PREMIUMBONUS_TOKEN: z.string().min(1),
   REDIS_HOST: z.string().default("127.0.0.1"),
@@ -102,10 +100,6 @@ export interface AppConfig {
     maskErrorDetails: boolean;
   };
   externalApis: {
-    yclients: {
-      baseUrl: string;
-      userToken: string;
-    };
     premiumBonus: {
       baseUrl: string;
       token: string;
@@ -173,8 +167,6 @@ export function loadConfig(): AppConfig {
     ALLOWED_ORIGINS,
     LOG_LEVEL,
     TRACING_ENABLED,
-    YCLIENTS_API_BASE_URL,
-    YCLIENTS_USER_TOKEN,
     PREMIUMBONUS_API_BASE_URL,
     PREMIUMBONUS_TOKEN,
     REDIS_HOST,
@@ -230,10 +222,6 @@ export function loadConfig(): AppConfig {
       maskErrorDetails: settings.maskErrorDetails,
     },
     externalApis: {
-      yclients: {
-        baseUrl: YCLIENTS_API_BASE_URL,
-        userToken: YCLIENTS_USER_TOKEN,
-      },
       premiumBonus: {
         baseUrl: PREMIUMBONUS_API_BASE_URL,
         token: PREMIUMBONUS_TOKEN,

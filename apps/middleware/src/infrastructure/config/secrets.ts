@@ -141,9 +141,7 @@ class VaultSecretProvider implements SecretProvider {
         headers: this.token ? { "X-Vault-Token": this.token } : undefined,
       });
 
-      const vaultTokenCandidate = response.headers.get?.(
-        "x-vault-token",
-      ) as unknown;
+      const vaultTokenCandidate = response.headers["x-vault-token"] as unknown;
       if (
         typeof vaultTokenCandidate === "string" &&
         vaultTokenCandidate.length > 0

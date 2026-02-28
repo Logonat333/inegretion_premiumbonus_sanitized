@@ -27,11 +27,6 @@ describe("ProcessPurchaseUseCase", () => {
     };
 
     const dependencies: ProcessPurchaseDependencies = {
-      yclientsAdapter: {
-        getPurchase: vi
-          .fn<[string], Promise<Purchase>>()
-          .mockResolvedValue(purchase),
-      },
       premiumBonusAdapter: {
         createPurchase: vi
           .fn<[Purchase], Promise<void>>()

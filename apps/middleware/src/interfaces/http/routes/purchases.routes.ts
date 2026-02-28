@@ -10,7 +10,6 @@ export function purchasesRouter(config: AppConfig): Router {
 
   const context = createAppContext(config);
   const processPurchase = new ProcessPurchaseUseCase({
-    yclientsAdapter: context.yclientsAdapter,
     premiumBonusAdapter: context.premiumBonusAdapter,
     auditLogRepository: context.auditLogRepository,
     purchaseQueue: context.purchaseQueue,

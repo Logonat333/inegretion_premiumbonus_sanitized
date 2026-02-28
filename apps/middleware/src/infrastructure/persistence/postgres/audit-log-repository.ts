@@ -5,7 +5,7 @@ import type { AppConfig } from "@infrastructure/config/config";
 
 export interface AuditLogEntry {
   purchase: Purchase;
-  source: "yclients" | "premiumbonus";
+  source: "premiumbonus";
 }
 
 export class AuditLogRepository {

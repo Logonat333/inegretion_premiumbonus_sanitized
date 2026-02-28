@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import pinoHttp from "pino-http";
+import { randomUUID } from "crypto";
 
 import type { AppConfig } from "@infrastructure/config/config";
 import { logger } from "@infrastructure/observability/logger";
@@ -27,12 +28,13 @@ export function createServer({ config }: CreateServerOptions): express.Express {
     pinoHttp({
       logger,
       autoLogging: config.observability.requestLogging === "standard",
-      genReqId: (req) => req.requestId ?? undefined,
+      genReqId: (req) => req.requestId ?? randomUUID(),
       customLogLevel: (res, err) => {
-        if (err || res.statusCode >= 500) {
+        const statusCode = res.statusCode ?? 200;
+        if (err || statusCode >= 500) {
           return "error";
         }
-        if (res.statusCode >= 400) {
+        if (statusCode >= 400) {
           return "warn";
         }
         return "info";

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: yclients-premiumbonus-middleware
+  name: premiumbonus-middleware
   labels:
-    app: yclients-premiumbonus-middleware
+    app: premiumbonus-middleware
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: yclients-premiumbonus-middleware
+      app: premiumbonus-middleware
   template:
     metadata:
       labels:
-        app: yclients-premiumbonus-middleware
+        app: premiumbonus-middleware
     spec:
       containers:
         - name: middleware
-          image: ghcr.io/your-org/yclients-premiumbonus-middleware:latest
+          image: ghcr.io/your-org/premiumbonus-middleware:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: NODE_ENV

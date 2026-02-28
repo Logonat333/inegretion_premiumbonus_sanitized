@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: YClients Premium Bonus Middleware API
+  title: PremiumBonus Integration API
   version: 0.1.0
-  description: Middleware between YClients and PremiumBonus loyalty platform.
+  description: HTTP service that validates and forwards purchases to PremiumBonus.
 servers:
   - url: http://localhost:3000
 paths:
